@@ -1,0 +1,20 @@
+{
+package parser
+
+import "reflect"
+import "fmt"
+}
+
+Input <- text:.* EOF {
+    result := ""
+
+    for _, el := range text.([]any) {
+        result += string(el.([]uint8))
+    }
+
+    return result, nil
+}
+
+ws "whitespace" <- [ \n\t\r]*
+
+EOF<- !.

@@ -114,6 +114,39 @@ Loops are achieved with the use of arrays and ranges combined with a map:
 [0..10] |> x -> out "Hello {x}"
 ```
 
+### Functions
+Functions in piper are defined using the `->` symbol. On the left side we provide the argument with it's type and the return type, and on the right side the expression, which can reference the argument we passed of course.
+
+Example:
+```
+x: int (int) -> x*2
+```
+
+Functions do not have an explicit return keyword, but rather return the evaluation of the expression. Therefore, functions are also expressions (they always return something including Unit).
+Also, functions can only have one argument. Multiple arguments are handled using currying.
+
+Like so:
+
+```
+a: int (func) -> b: int (int) -> a + b
+```
+
+### Code Blocks
+Piper allows specifically grouping expressions to allow for finer control of order of execution.
+An empty code block looks like this: `{}`
+An empty code block returns the `Unit`
+
+For example:
+```
+x: int -> {"The argument was {x}" | out}
+```
+
+### Ternary Operators
+If an expression returns a boolean, it can be used as the condition of a ternary operator expression (`?:`), which decides which expression to execute based on the condition
+```
+x: bool (string) -> x ? "The value was true" : "The value was false"
+```
+
 ## Grammar
 
 ```

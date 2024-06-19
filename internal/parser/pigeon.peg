@@ -5,16 +5,26 @@ import "reflect"
 import "fmt"
 }
 
-Input <- text:.* EOF {
-    result := ""
+Input <- input:(sf ( Expression ) sf ln)* EOF {
+    results := []any{}
 
-    for _, el := range text.([]any) {
-        result += string(el.([]uint8))
+    for _, item := range input.([]any) {
+        results = append(results, item.([]any)[1].(any))
     }
 
-    return result, nil
+    return results, nil
 }
 
-ws "whitespace" <- [ \n\t\r]*
+Expression <- exp:(MathOperation / Integer) {
+    return exp, nil
+}
+
+MathOperation <- right:Expression sf (`+` / `-` / `/` / `*`) sf left:Expression
+
+Integer <- [0-9]+
+
+sf "spacefiller" <- [ \t]*
+
+ln "linebreak" <- [\n\r]+
 
 EOF<- !.

@@ -30,64 +30,222 @@ var g = &grammar{
 					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 8, col: 10, offset: 60},
-							label: "text",
+							label: "input",
 							expr: &zeroOrMoreExpr{
-								pos: position{line: 8, col: 15, offset: 65},
-								expr: &anyMatcher{
-									line: 8, col: 15, offset: 65,
+								pos: position{line: 8, col: 16, offset: 66},
+								expr: &seqExpr{
+									pos: position{line: 8, col: 17, offset: 67},
+									exprs: []any{
+										&ruleRefExpr{
+											pos:  position{line: 8, col: 17, offset: 67},
+											name: "sf",
+										},
+										&ruleRefExpr{
+											pos:  position{line: 8, col: 22, offset: 72},
+											name: "Expression",
+										},
+										&ruleRefExpr{
+											pos:  position{line: 8, col: 35, offset: 85},
+											name: "sf",
+										},
+										&ruleRefExpr{
+											pos:  position{line: 8, col: 38, offset: 88},
+											name: "ln",
+										},
+									},
 								},
 							},
 						},
 						&ruleRefExpr{
-							pos:  position{line: 8, col: 18, offset: 68},
+							pos:  position{line: 8, col: 43, offset: 93},
 							name: "EOF",
 						},
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
-			name:        "ws",
-			displayName: "\"whitespace\"",
-			pos:         position{line: 18, col: 1, offset: 202},
-			expr: &zeroOrMoreExpr{
-				pos: position{line: 18, col: 20, offset: 221},
+			name: "Expression",
+			pos:  position{line: 18, col: 1, offset: 255},
+			expr: &actionExpr{
+				pos: position{line: 18, col: 15, offset: 269},
+				run: (*parser).callonExpression1,
+				expr: &labeledExpr{
+					pos:   position{line: 18, col: 15, offset: 269},
+					label: "exp",
+					expr: &choiceExpr{
+						pos: position{line: 18, col: 20, offset: 274},
+						alternatives: []any{
+							&ruleRefExpr{
+								pos:  position{line: 18, col: 20, offset: 274},
+								name: "MathOperation",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 18, col: 36, offset: 290},
+								name: "Integer",
+							},
+						},
+					},
+				},
+			},
+			leader:        true,
+			leftRecursive: true,
+		},
+		{
+			name: "MathOperation",
+			pos:  position{line: 22, col: 1, offset: 324},
+			expr: &seqExpr{
+				pos: position{line: 22, col: 18, offset: 341},
+				exprs: []any{
+					&labeledExpr{
+						pos:   position{line: 22, col: 18, offset: 341},
+						label: "right",
+						expr: &ruleRefExpr{
+							pos:  position{line: 22, col: 24, offset: 347},
+							name: "Expression",
+						},
+					},
+					&ruleRefExpr{
+						pos:  position{line: 22, col: 35, offset: 358},
+						name: "sf",
+					},
+					&choiceExpr{
+						pos: position{line: 22, col: 39, offset: 362},
+						alternatives: []any{
+							&litMatcher{
+								pos:        position{line: 22, col: 39, offset: 362},
+								val:        "+",
+								ignoreCase: false,
+								want:       "\"+\"",
+							},
+							&litMatcher{
+								pos:        position{line: 22, col: 45, offset: 368},
+								val:        "-",
+								ignoreCase: false,
+								want:       "\"-\"",
+							},
+							&litMatcher{
+								pos:        position{line: 22, col: 51, offset: 374},
+								val:        "/",
+								ignoreCase: false,
+								want:       "\"/\"",
+							},
+							&litMatcher{
+								pos:        position{line: 22, col: 57, offset: 380},
+								val:        "*",
+								ignoreCase: false,
+								want:       "\"*\"",
+							},
+						},
+					},
+					&ruleRefExpr{
+						pos:  position{line: 22, col: 62, offset: 385},
+						name: "sf",
+					},
+					&labeledExpr{
+						pos:   position{line: 22, col: 65, offset: 388},
+						label: "left",
+						expr: &ruleRefExpr{
+							pos:  position{line: 22, col: 70, offset: 393},
+							name: "Expression",
+						},
+					},
+				},
+			},
+			leader:        false,
+			leftRecursive: true,
+		},
+		{
+			name: "Integer",
+			pos:  position{line: 24, col: 1, offset: 405},
+			expr: &oneOrMoreExpr{
+				pos: position{line: 24, col: 12, offset: 416},
 				expr: &charClassMatcher{
-					pos:        position{line: 18, col: 20, offset: 221},
-					val:        "[ \\n\\t\\r]",
-					chars:      []rune{' ', '\n', '\t', '\r'},
+					pos:        position{line: 24, col: 12, offset: 416},
+					val:        "[0-9]",
+					ranges:     []rune{'0', '9'},
 					ignoreCase: false,
 					inverted:   false,
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name:        "sf",
+			displayName: "\"spacefiller\"",
+			pos:         position{line: 26, col: 1, offset: 424},
+			expr: &zeroOrMoreExpr{
+				pos: position{line: 26, col: 21, offset: 444},
+				expr: &charClassMatcher{
+					pos:        position{line: 26, col: 21, offset: 444},
+					val:        "[ \\t]",
+					chars:      []rune{' ', '\t'},
+					ignoreCase: false,
+					inverted:   false,
+				},
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name:        "ln",
+			displayName: "\"linebreak\"",
+			pos:         position{line: 28, col: 1, offset: 452},
+			expr: &oneOrMoreExpr{
+				pos: position{line: 28, col: 19, offset: 470},
+				expr: &charClassMatcher{
+					pos:        position{line: 28, col: 19, offset: 470},
+					val:        "[\\n\\r]",
+					chars:      []rune{'\n', '\r'},
+					ignoreCase: false,
+					inverted:   false,
+				},
+			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 20, col: 1, offset: 233},
+			pos:  position{line: 30, col: 1, offset: 479},
 			expr: &notExpr{
-				pos: position{line: 20, col: 7, offset: 239},
+				pos: position{line: 30, col: 7, offset: 485},
 				expr: &anyMatcher{
-					line: 20, col: 8, offset: 240,
+					line: 30, col: 8, offset: 486,
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 	},
 }
 
-func (c *current) onInput1(text any) (any, error) {
-	result := ""
+func (c *current) onInput1(input any) (any, error) {
+	results := []any{}
 
-	for _, el := range text.([]any) {
-		result += string(el.([]uint8))
+	for _, item := range input.([]any) {
+		results = append(results, item.([]any)[1].(any))
 	}
 
-	return result, nil
+	return results, nil
 }
 
 func (p *parser) callonInput1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onInput1(stack["text"])
+	return p.cur.onInput1(stack["input"])
+}
+
+func (c *current) onExpression1(exp any) (any, error) {
+	return exp, nil
+}
+
+func (p *parser) callonExpression1() (any, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onExpression1(stack["exp"])
 }
 
 var (
@@ -325,6 +483,9 @@ type rule struct {
 	name        string
 	displayName string
 	expr        any
+
+	leader        bool
+	leftRecursive bool
 }
 
 type choiceExpr struct {
@@ -540,6 +701,11 @@ type Stats struct {
 	// the parser option Statistics.
 	// For an alternative to be included in ChoiceAltCnt, it has to match at least once.
 	ChoiceAltCnt map[string]map[string]int
+}
+
+type ruleWithExpsStack struct {
+	rule   *rule
+	estack []any
 }
 
 type parser struct {
@@ -906,6 +1072,54 @@ func listJoin(list []string, sep string, lastSep string) string {
 	}
 }
 
+func (p *parser) parseRuleRecursiveLeader(rule *rule) (any, bool) {
+	result, ok := p.getMemoized(rule)
+	if ok {
+		p.restore(result.end)
+		return result.v, result.b
+	}
+
+	if p.debug {
+		defer p.out(p.in("recursive " + rule.name))
+	}
+
+	var (
+		depth      = 0
+		startMark  = p.pt
+		lastResult = resultTuple{nil, false, startMark}
+		lastErrors = *p.errs
+	)
+
+	for {
+		lastState := p.cloneState()
+		p.setMemoized(startMark, rule, lastResult)
+		val, ok := p.parseRule(rule)
+		endMark := p.pt
+		if p.debug {
+			p.printIndent("RECURSIVE", fmt.Sprintf(
+				"Rule %s depth %d: %t -> %s",
+				rule.name, depth, ok, string(p.sliceFrom(startMark))))
+		}
+		if (!ok) || (endMark.offset <= lastResult.end.offset && depth != 0) {
+			p.restoreState(lastState)
+			*p.errs = lastErrors
+			break
+		}
+		lastResult = resultTuple{val, ok, endMark}
+		lastErrors = *p.errs
+		p.restore(startMark)
+		depth++
+	}
+
+	p.restore(lastResult.end)
+	p.setMemoized(startMark, rule, lastResult)
+	return lastResult.v, lastResult.b
+}
+
+func (p *parser) parseRuleRecursiveNoLeader(rule *rule) (any, bool) {
+	return p.parseRule(rule)
+}
+
 func (p *parser) parseRuleMemoize(rule *rule) (any, bool) {
 	res, ok := p.getMemoized(rule)
 	if ok {
@@ -930,8 +1144,14 @@ func (p *parser) parseRuleWrap(rule *rule) (any, bool) {
 		startMark = p.pt
 	)
 
-	if p.memoize {
-		val, ok = p.parseRuleMemoize(rule)
+	if p.memoize || rule.leftRecursive {
+		if rule.leader {
+			val, ok = p.parseRuleRecursiveLeader(rule)
+		} else if p.memoize && !rule.leftRecursive {
+			val, ok = p.parseRuleMemoize(rule)
+		} else {
+			val, ok = p.parseRuleRecursiveNoLeader(rule)
+		}
 	} else {
 		val, ok = p.parseRule(rule)
 	}
@@ -954,7 +1174,8 @@ func (p *parser) parseRule(rule *rule) (any, bool) {
 func (p *parser) parseExprWrap(expr any) (any, bool) {
 	var pt savepoint
 
-	if p.memoize {
+	isLeftRecusion := p.rstack[len(p.rstack)-1].leftRecursive
+	if p.memoize && !isLeftRecusion {
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
@@ -965,7 +1186,7 @@ func (p *parser) parseExprWrap(expr any) (any, bool) {
 
 	val, ok := p.parseExpr(expr)
 
-	if p.memoize {
+	if p.memoize && !isLeftRecusion {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
 	return val, ok

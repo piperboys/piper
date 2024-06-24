@@ -19,10 +19,10 @@ type Operation struct {
 }
 
 func extractExpression(input any) (any, error) {
-	results := []any{}
+	var results []any
 
 	for _, line := range input.([]any) {
-		lineResult := []any{}
+		var lineResult []any
 
 		// Get the second element in the line array (the expression)
 		lineResult = append(lineResult, line.([]any)[1])

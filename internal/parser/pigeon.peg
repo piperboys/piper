@@ -5,26 +5,25 @@ import "reflect"
 import "fmt"
 }
 
-Input <- input:(sf ( Expression ) sf ln)* EOF {
-    results := []any{}
-
-    for _, item := range input.([]any) {
-        results = append(results, item.([]any)[1].(any))
-    }
-
-    return results, nil
+Input <- input:((sf Expression sf)* ln)* EOF {
+    return extract_expression(input)
 }
 
-Expression <- exp:(MathOperation / Integer) {
-    return exp, nil
+Expression <- exp:(Operation / Constant)
+
+Operation <- left:Expression sf operator:Operator sf right:Expression {
+    return extractOperation(left, operator, right)
 }
 
-MathOperation <- right:Expression sf (`+` / `-` / `/` / `*`) sf left:Expression
+Operator <- operator:(`+` / `-` / `/` / `*` / `|` / `|>`) {
+    return extractOperator(operator)
+}
 
-Integer <- [0-9]+
+Constant <- Integer
+Integer <- integer:[0-9]+ {
+    return extractInteger(integer)
+}
 
 sf "spacefiller" <- [ \t]*
-
 ln "linebreak" <- [\n\r]+
-
 EOF<- !.

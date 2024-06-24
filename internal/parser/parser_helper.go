@@ -18,16 +18,14 @@ type Operation struct {
 	right    any
 }
 
-func extract_expression(input any) (any, error) {
+func extractExpression(input any) (any, error) {
 	results := []any{}
 
-	for _, item := range input.([]any) {
+	for _, line := range input.([]any) {
 		lineResult := []any{}
 
-		for _, token := range item.([]any)[0].([]any) {
-			expression := token.([]any)[1]
-			lineResult = append(lineResult, expression)
-		}
+		// Get the second element in the line array (the expression)
+		lineResult = append(lineResult, line.([]any)[1])
 
 		results = append(results, lineResult)
 	}

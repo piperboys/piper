@@ -59,10 +59,18 @@ func extractInteger(integer any) (Integer, error) {
 	return Integer{value: value}, nil
 }
 
-func extractOperation(left any, operator any, right any) (Operation, error) {
-	return Operation{
-		left:     left,
-		operator: operator.(Operator),
-		right:    right,
-	}, nil
+func extractOperation(left any, operator any, right any) ([]any, error) {
+	var combined []any
+
+	combined = append(combined, left)
+	combined = append(combined, operator.(Operator))
+
+	rightSlice, ok := right.([]any)
+	if !ok {
+		combined = append(combined, right)
+	} else {
+		combined = append(combined, rightSlice...)
+	}
+
+	return combined, nil
 }

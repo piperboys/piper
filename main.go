@@ -36,6 +36,12 @@ func main() {
 	fmt.Printf("output:\n%+v\n", string(result))
 
 	printDebug(res.([]any))
+
+	for _, v := range res.([]any) {
+		evalResult := interpreter.Evaluate(v.([]any))
+
+		fmt.Println(evalResult)
+	}
 }
 
 func printDebug(res []any) {

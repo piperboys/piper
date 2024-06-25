@@ -5,7 +5,7 @@ import (
 )
 
 type Integer struct {
-	value int
+	Value int
 }
 
 type Operator struct {
@@ -64,7 +64,7 @@ func extractInteger(integer any) (Integer, error) {
 		panic("Invalid integer parsed!")
 	}
 
-	return Integer{value: value}, nil
+	return Integer{Value: value}, nil
 }
 
 func extractOperation(left any, operator any, right any) ([]any, error) {

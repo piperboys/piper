@@ -5,7 +5,7 @@ import "reflect"
 import "fmt"
 }
 
-Input <- input:(sf Expression sf ln)* EOF {
+Input <- input:(sf Expression sf (ln/EOF))* EOF{
     return extractExpression(input)
 }
 

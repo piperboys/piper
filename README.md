@@ -40,6 +40,9 @@ pigeon -support-left-recursion -o internal/parser/parser.go internal/parser/pige
 # Run the interpreter
 go run .
 
+# Run the interpreter in repl mode
+go run . -repl
+
 # Regenerate parser & running the interpreter (useful for parser development)
 pigeon -support-left-recursion -o internal/parser/parser.go internal/parser/pigeon.peg && go run .
 ```

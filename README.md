@@ -25,7 +25,7 @@ This ensures that the pigeon binary gets installed into your `$GOPATH/bin` direc
 After you restarted your terminal, the `pigeon -h` command should be available and ready to use.
 
 **If you installed pigeon beforehand, you'll need to rerun the following command:**
-```go
+```bash
 go install github.com/mna/pigeon@latest`
 ```
 ---

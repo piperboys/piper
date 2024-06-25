@@ -9,7 +9,7 @@ type Integer struct {
 }
 
 type Operator struct {
-	value string
+	Value string
 }
 
 type Operation struct {
@@ -25,7 +25,15 @@ func extractExpression(input any) (any, error) {
 		var lineResult []any
 
 		// Get the second element in the line array (the expression)
-		lineResult = append(lineResult, line.([]any)[1])
+		lineSlice := line.([]any)
+
+		expression, ok := lineSlice[1].([]any)
+
+		if !ok {
+			lineResult = append(lineResult, line.([]any)[1])
+		} else {
+			lineResult = append(lineResult, expression...)
+		}
 
 		results = append(results, lineResult)
 	}
@@ -40,7 +48,7 @@ func extractOperator(operator any) (Operator, error) {
 		panic("Invalid operator parsed")
 	}
 
-	return Operator{value: string(v)}, nil
+	return Operator{Value: string(v)}, nil
 }
 
 func extractInteger(integer any) (Integer, error) {

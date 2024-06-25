@@ -6,6 +6,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/aerochrome/piper/internal/interpreter"
 	"github.com/aerochrome/piper/internal/parser"
 )
 
@@ -22,6 +23,11 @@ func main() {
 		return
 	}
 
+	// Transform
+	for idx, v := range res.([]any) {
+		res.([]any)[idx] = interpreter.TransformToReversePolishNotation(v.([]any))
+	}
+
 	result, err := json.MarshalIndent(res, "", "   ")
 	if err != nil {
 		fmt.Println(err)
@@ -35,7 +41,12 @@ func main() {
 func printDebug(res []any) {
 	fmt.Println("Debug:")
 
-	printAnySliceRecursive(res)
+	for idx, v := range res {
+		if idx > 0 {
+			fmt.Print(",\n")
+		}
+		printAnySliceRecursive(v.([]any))
+	}
 
 	fmt.Printf("\n")
 }

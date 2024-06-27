@@ -26,7 +26,7 @@ After you restarted your terminal, the `pigeon -h` command should be available a
 
 **If you installed pigeon beforehand, you'll need to rerun the following command:**
 ```bash
-go install github.com/mna/pigeon@latest`
+go install github.com/mna/pigeon@latest
 ```
 ---
 ### Running the interpreter

@@ -138,7 +138,7 @@ func getPrecedence(operator parser.Operator) int {
 		"+":  2,
 		"-":  2,
 		"|>": 1,
-		"|":  0,
+		"|":  1,
 	}
 
 	precedence, ok := precedenceMap[operator.Value]

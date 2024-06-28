@@ -66,7 +66,7 @@ func handleRepl() {
 
 		// Evaluate
 		for _, v := range res.([]any) {
-			evalResult := interpreterStruct.Evaluate(v.([]any))
+			evalResult := interpreterStruct.Evaluate(v.([]any), nil)
 			fmt.Println(evalResult)
 		}
 
@@ -103,7 +103,7 @@ func handleFileRead() {
 	interpreterStruct := interpreter.NewInterpreter()
 
 	for _, v := range res.([]any) {
-		evalResult := interpreterStruct.Evaluate(v.([]any))
+		evalResult := interpreterStruct.Evaluate(v.([]any), nil)
 
 		fmt.Println(evalResult)
 	}

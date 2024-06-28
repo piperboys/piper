@@ -13,7 +13,9 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{variables: make(map[string]*parser.Variable)}
 }
 
-func (interpreter *Interpreter) Evaluate(input []any) any {
+// Evaluate | additionalContext is for scope variables, like in a function call for example (the argument)
+// the additionalContext also shadows the global variables
+func (interpreter *Interpreter) Evaluate(input []any, additionalContext map[string]*parser.Variable) any {
 	var stack []any
 
 	for _, item := range input {
@@ -25,11 +27,12 @@ func (interpreter *Interpreter) Evaluate(input []any) any {
 			right := stack[len(stack)-1]
 			stack = stack[:len(stack)-2] // remove the last two
 
-			stack = append(stack, evaluateOperation(left, right, item))
+			stack = append(stack, interpreter.evaluateOperation(left, right, item, additionalContext))
 		case parser.VariableDeclaration:
-			_, exists := interpreter.variables[item.Variable.Name]
+			_, existsInContext := additionalContext[item.Variable.Name]
+			_, existsInGlobal := interpreter.variables[item.Variable.Name]
 
-			if exists {
+			if existsInContext || existsInGlobal {
 				panic(fmt.Sprintf("Variable '%s' cannot be redefined", item.Variable.Name))
 			}
 
@@ -37,9 +40,9 @@ func (interpreter *Interpreter) Evaluate(input []any) any {
 
 			var result any
 			if ok {
-				result = interpreter.Evaluate(exprSlice)
+				result = interpreter.Evaluate(exprSlice, additionalContext)
 			} else {
-				result = interpreter.Evaluate([]any{item.Expression})
+				result = interpreter.Evaluate([]any{item.Expression}, additionalContext)
 			}
 
 			interpreter.variables[item.Variable.Name] = &item.Variable
@@ -47,14 +50,20 @@ func (interpreter *Interpreter) Evaluate(input []any) any {
 
 			stack = append(stack, result)
 		case parser.Variable:
-			variable, exists := interpreter.variables[item.Name]
+			contextVariable, existsInContext := additionalContext[item.Name]
 
-			if !exists {
-				panic(fmt.Sprintf("Variable '%s' is not defined", item.Name))
+			if existsInContext {
+				stack = append(stack, contextVariable.Value)
+			} else {
+				variable, exists := interpreter.variables[item.Name]
+
+				if !exists {
+					panic(fmt.Sprintf("Variable '%s' is not defined", item.Name))
+				}
+
+				// TODO we might wanna push the variable on the stack instead of just the value?
+				stack = append(stack, variable.Value)
 			}
-
-			// TODO we might wanna push the variable on the stack instead of just the value?
-			stack = append(stack, variable.Value)
 		default:
 			panic("Unknown token found")
 		}
@@ -67,12 +76,68 @@ func (interpreter *Interpreter) Evaluate(input []any) any {
 	return stack[0]
 }
 
-func evaluateOperation(left any, right any, operator parser.Operator) any {
+func (interpreter *Interpreter) evaluateOperation(left any, right any, operator parser.Operator, additionalContext map[string]*parser.Variable) any {
+	switch operator.Value {
+	case "+", "-", "*", "/":
+		return evaluateArithmeticOperation(left, right, operator)
+	case "|":
+		return interpreter.evaluateFunctionCall(left, right, additionalContext)
+	default:
+		panic(fmt.Sprintf("Unknown operator '%s'", operator.Value))
+	}
+}
+
+func (interpreter *Interpreter) evaluateFunctionCall(left any, right any, additionalContext map[string]*parser.Variable) any {
+	leftExpr, isExpr := left.(parser.Expression)
+
+	if !isExpr {
+		panic(fmt.Sprintf("Unknown left expression type: %T", left))
+	}
+
+	switch v := right.(type) {
+	case parser.Function:
+		return interpreter.callFunction(v, leftExpr, additionalContext)
+	default:
+		panic(fmt.Sprintf("Expression '%v' of type '%T' is not a function", v, v))
+	}
+}
+
+func (interpreter *Interpreter) callFunction(function parser.Function, argument parser.Expression, additionalContext map[string]*parser.Variable) any {
+	if argument.GetType() != function.ArgumentType {
+		panic(fmt.Sprintf("Cannot pass type '%s' to argument of type '%s'", argument.GetType(), function.ArgumentType))
+	}
+
+	if additionalContext == nil {
+		additionalContext = make(map[string]*parser.Variable)
+	} else {
+		// Make a shallow copy so that different function scopes don't interfere with each other
+		additionalContext = copyAdditionalContextShallow(additionalContext)
+	}
+
+	additionalContext[function.ArgumentName] = &parser.Variable{Name: function.ArgumentName, Value: argument}
+
+	exprSlice, ok := function.Expression.([]any)
+
+	var result any
+	if ok {
+		result = interpreter.Evaluate(exprSlice, additionalContext)
+	} else {
+		result = interpreter.Evaluate([]any{function.Expression}, additionalContext)
+	}
+
+	if result.(parser.Expression).GetType() != function.ReturnType {
+		panic(fmt.Sprintf("Function returns '%s' but return type is '%s'", result.(parser.Expression).GetType(), function.ReturnType))
+	}
+
+	return result
+}
+
+func evaluateArithmeticOperation(left any, right any, operator parser.Operator) any {
 	leftInt, ok1 := left.(parser.Integer)
 	rightInt, ok2 := right.(parser.Integer)
 
 	if !(ok1 && ok2) {
-		panic("Invalid operation")
+		panic("Invalid arithmetic operation")
 	}
 
 	switch operator.Value {
@@ -85,6 +150,15 @@ func evaluateOperation(left any, right any, operator parser.Operator) any {
 	case "/":
 		return parser.Integer{Value: leftInt.Value / rightInt.Value}
 	default:
-		panic("Invalid operator")
+		panic("Invalid arithmetic operator")
 	}
+}
+
+// Function to make a shallow copy of a map
+func copyAdditionalContextShallow(original map[string]*parser.Variable) map[string]*parser.Variable {
+	mapCopy := make(map[string]*parser.Variable)
+	for key, value := range original {
+		mapCopy[key] = value
+	}
+	return mapCopy
 }

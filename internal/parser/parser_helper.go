@@ -5,14 +5,14 @@ import (
 )
 
 type Expression interface {
-	getType() string
+	GetType() string
 }
 
 type Integer struct {
 	Value int
 }
 
-func (int Integer) getType() string {
+func (int Integer) GetType() string {
 	return "int"
 }
 
@@ -25,8 +25,8 @@ type Variable struct {
 	Value Expression
 }
 
-func (variable Variable) getType() string {
-	return variable.Value.getType()
+func (variable Variable) GetType() string {
+	return variable.Value.GetType()
 }
 
 type Operation struct {
@@ -55,7 +55,7 @@ type Function struct {
 	Expression   any
 }
 
-func (function Function) getType() string {
+func (function Function) GetType() string {
 	// The function declaration in itself is of type func, only the call of the func has the ReturnType as Type
 	return "func"
 }

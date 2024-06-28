@@ -23,7 +23,13 @@ func TransformToReversePolishNotation(result []any) []any {
 					operator, ok := operatorStack[idx].(parser.Operator)
 
 					if !ok {
-						panic("Encountered non-operator on operator stack")
+						_, isLeftParenthesis := operatorStack[idx].(parser.LeftParenthesis)
+
+						if isLeftParenthesis {
+							break
+						}
+
+						panic("Encountered unknown operator on operator stack")
 					}
 
 					operatorPrecedence := getPrecedence(operator)
@@ -37,6 +43,30 @@ func TransformToReversePolishNotation(result []any) []any {
 			}
 
 			operatorStack = append(operatorStack, v)
+		case parser.LeftParenthesis:
+			operatorStack = append(operatorStack, v)
+		case parser.RightParenthesis:
+			matchedParenthesis := false
+
+			for len(operatorStack) > 0 {
+				top := operatorStack[len(operatorStack)-1]
+				_, isLeftParenthesis := top.(parser.LeftParenthesis)
+
+				if isLeftParenthesis {
+					operatorStack = operatorStack[:len(operatorStack)-1]
+					matchedParenthesis = true
+					break
+				} else {
+					outputQueue = append(outputQueue, top)
+					operatorStack = operatorStack[:len(operatorStack)-1]
+				}
+			}
+
+			if !matchedParenthesis {
+				panic("Mismatched parenthesis: no matching opening parenthesis")
+			}
+		default:
+			panic("Unknown token encountered")
 		}
 
 	}
@@ -44,6 +74,11 @@ func TransformToReversePolishNotation(result []any) []any {
 	// Move every operator left to outputQueue
 	if len(operatorStack) > 0 {
 		for idx := len(operatorStack) - 1; idx >= 0; idx-- {
+			_, isLeftParenthesis := operatorStack[idx].(parser.LeftParenthesis)
+			if isLeftParenthesis {
+				panic("Mismatched parenthesis: no matching closing parenthesis")
+			}
+
 			outputQueue = append(outputQueue, operatorStack[idx])
 		}
 	}

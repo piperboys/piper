@@ -9,7 +9,7 @@ Input <- input:(sf Expression sf (ln/EOF))* EOF{
     return extractExpression(input)
 }
 
-Expression <- exp:(Operation / Constant)
+Expression <- exp:(Operation / Group / Constant)
 
 Operation <- left:Expression sf operator:Operator sf right:Expression {
     return extractOperation(left, operator, right)
@@ -19,10 +19,16 @@ Operator <- operator:(`+` / `-` / `/` / `*` / `|` / `|>`) {
     return extractOperator(operator)
 }
 
+Group <- LeftParenthesis sf expression:Expression sf RightParenthesis {
+    return extractGroup(expression)
+}
+
 Constant <- Integer
 Integer <- integer:[0-9]+ {
     return extractInteger(integer)
 }
+LeftParenthesis <- `(`
+RightParenthesis <- `)`
 
 sf "spacefiller" <- [ \t]*
 ln "linebreak" <- [\n\r]+

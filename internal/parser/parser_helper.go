@@ -18,6 +18,14 @@ type Operation struct {
 	right    any
 }
 
+type LeftParenthesis struct {
+	Value string
+}
+
+type RightParenthesis struct {
+	Value string
+}
+
 func extractExpression(input any) (any, error) {
 	var results []any
 
@@ -70,15 +78,38 @@ func extractInteger(integer any) (Integer, error) {
 func extractOperation(left any, operator any, right any) ([]any, error) {
 	var combined []any
 
-	combined = append(combined, left)
+	leftSlice, isSlice := left.([]any)
+
+	if isSlice {
+		combined = append(combined, leftSlice...)
+	} else {
+		combined = append(combined, left)
+	}
+
 	combined = append(combined, operator.(Operator))
 
-	rightSlice, ok := right.([]any)
-	if !ok {
-		combined = append(combined, right)
-	} else {
+	rightSlice, isSlice := right.([]any)
+	if isSlice {
 		combined = append(combined, rightSlice...)
+	} else {
+		combined = append(combined, right)
 	}
+
+	return combined, nil
+}
+
+func extractGroup(expression any) ([]any, error) {
+	combined := []any{LeftParenthesis{Value: "("}}
+
+	sliceExpr, isSlice := expression.([]any)
+
+	if isSlice {
+		combined = append(combined, sliceExpr...)
+	} else {
+		combined = append(combined, expression)
+	}
+
+	combined = append(combined, RightParenthesis{Value: ")"})
 
 	return combined, nil
 }

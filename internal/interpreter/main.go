@@ -18,7 +18,7 @@ func (interpreter *Interpreter) Evaluate(input []any) any {
 
 	for _, item := range input {
 		switch item := item.(type) {
-		case parser.Integer:
+		case parser.Integer, parser.Function:
 			stack = append(stack, item)
 		case parser.Operator:
 			left := stack[len(stack)-2]
@@ -53,6 +53,7 @@ func (interpreter *Interpreter) Evaluate(input []any) any {
 				panic(fmt.Sprintf("Variable '%s' is not defined", item.Name))
 			}
 
+			// TODO we might wanna push the variable on the stack instead of just the value?
 			stack = append(stack, variable.Value)
 		default:
 			panic("Unknown token found")

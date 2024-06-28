@@ -48,6 +48,18 @@ type VariableDeclaration struct {
 	Expression any
 }
 
+type Function struct {
+	ArgumentName string
+	ArgumentType string
+	ReturnType   string
+	Expression   any
+}
+
+func (function Function) getType() string {
+	// The function declaration in itself is of type func, only the call of the func has the ReturnType as Type
+	return "func"
+}
+
 func extractExpression(input any) (any, error) {
 	var results []any
 
@@ -142,4 +154,13 @@ func extractGroup(expression any) ([]any, error) {
 
 func extractVariableDeclaration(variable any, expression any) (VariableDeclaration, error) {
 	return VariableDeclaration{Variable: variable.(Variable), Expression: expression}, nil
+}
+
+func extractFunction(argument any, argType any, returnType any, expr any) (Function, error) {
+	return Function{
+		ArgumentName: argument.(Variable).Name,
+		ArgumentType: argType.(string),
+		ReturnType:   returnType.(string),
+		Expression:   expr,
+	}, nil
 }

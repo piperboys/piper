@@ -19,6 +19,15 @@ func TransformToReversePolishNotation(result []any) []any {
 				}
 
 				result[0] = v
+			case parser.Function:
+				exprSlice, isSlice := v.Expression.([]any)
+				if isSlice {
+					v.Expression = TransformToReversePolishNotation(exprSlice)
+				} else {
+					v.Expression = TransformToReversePolishNotation([]any{v.Expression})
+				}
+
+				result[0] = v
 			}
 		}
 
@@ -84,6 +93,15 @@ func TransformToReversePolishNotation(result []any) []any {
 		case parser.VariableDeclaration:
 			// TODO Make this one better with pointers
 
+			exprSlice, isSlice := v.Expression.([]any)
+			if isSlice {
+				v.Expression = TransformToReversePolishNotation(exprSlice)
+			} else {
+				v.Expression = TransformToReversePolishNotation([]any{v.Expression})
+			}
+
+			outputQueue = append(outputQueue, v)
+		case parser.Function:
 			exprSlice, isSlice := v.Expression.([]any)
 			if isSlice {
 				v.Expression = TransformToReversePolishNotation(exprSlice)

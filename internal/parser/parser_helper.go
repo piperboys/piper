@@ -49,10 +49,11 @@ type VariableDeclaration struct {
 }
 
 type Function struct {
-	ArgumentName string
-	ArgumentType string
-	ReturnType   string
-	Expression   any
+	ArgumentName      string
+	ArgumentType      string
+	ReturnType        string
+	Expression        any
+	AdditionalContext map[string]*Variable
 }
 
 func (function Function) GetType() string {
@@ -158,9 +159,10 @@ func extractVariableDeclaration(variable any, expression any) (VariableDeclarati
 
 func extractFunction(argument any, argType any, returnType any, expr any) (Function, error) {
 	return Function{
-		ArgumentName: argument.(Variable).Name,
-		ArgumentType: argType.(string),
-		ReturnType:   returnType.(string),
-		Expression:   expr,
+		ArgumentName:      argument.(Variable).Name,
+		ArgumentType:      argType.(string),
+		ReturnType:        returnType.(string),
+		Expression:        expr,
+		AdditionalContext: nil,
 	}, nil
 }

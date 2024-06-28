@@ -107,26 +107,40 @@ func (interpreter *Interpreter) callFunction(function parser.Function, argument 
 		panic(fmt.Sprintf("Cannot pass type '%s' to argument of type '%s'", argument.GetType(), function.ArgumentType))
 	}
 
-	if additionalContext == nil {
-		additionalContext = make(map[string]*parser.Variable)
+	functionContext := function.AdditionalContext
+
+	if functionContext == nil {
+		functionContext = make(map[string]*parser.Variable)
 	} else {
-		// Make a shallow copy so that different function scopes don't interfere with each other
-		additionalContext = copyAdditionalContextShallow(additionalContext)
+		functionContext = copyAdditionalContextShallow(functionContext)
 	}
 
-	additionalContext[function.ArgumentName] = &parser.Variable{Name: function.ArgumentName, Value: argument}
+	if additionalContext != nil {
+		for key, value := range additionalContext {
+			functionContext[key] = value
+		}
+	}
+
+	functionContext[function.ArgumentName] = &parser.Variable{Name: function.ArgumentName, Value: argument}
 
 	exprSlice, ok := function.Expression.([]any)
 
 	var result any
 	if ok {
-		result = interpreter.Evaluate(exprSlice, additionalContext)
+		result = interpreter.Evaluate(exprSlice, functionContext)
 	} else {
-		result = interpreter.Evaluate([]any{function.Expression}, additionalContext)
+		result = interpreter.Evaluate([]any{function.Expression}, functionContext)
 	}
 
 	if result.(parser.Expression).GetType() != function.ReturnType {
 		panic(fmt.Sprintf("Function returns '%s' but return type is '%s'", result.(parser.Expression).GetType(), function.ReturnType))
+	}
+
+	if result.(parser.Expression).GetType() == "func" {
+		resultFunc := result.(parser.Function)
+		resultFunc.AdditionalContext = functionContext
+
+		result = resultFunc
 	}
 
 	return result

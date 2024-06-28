@@ -6,6 +6,22 @@ func TransformToReversePolishNotation(result []any) []any {
 	if len(result) <= 1 {
 		// TODO if function or possibly block, still order their expressions recursively and then return
 
+		if len(result) == 1 {
+			switch v := result[0].(type) {
+			case parser.VariableDeclaration:
+				// TODO Make this one better with pointers
+
+				exprSlice, isSlice := v.Expression.([]any)
+				if isSlice {
+					v.Expression = TransformToReversePolishNotation(exprSlice)
+				} else {
+					v.Expression = TransformToReversePolishNotation([]any{v.Expression})
+				}
+
+				result[0] = v
+			}
+		}
+
 		// One element or less, it's already in the perfect order
 		return result
 	}
@@ -15,7 +31,7 @@ func TransformToReversePolishNotation(result []any) []any {
 
 	for _, item := range result {
 		switch v := item.(type) {
-		case parser.Integer:
+		case parser.Integer, parser.Variable:
 			outputQueue = append(outputQueue, v)
 		case parser.Operator:
 			if len(operatorStack) > 0 {
@@ -65,6 +81,17 @@ func TransformToReversePolishNotation(result []any) []any {
 			if !matchedParenthesis {
 				panic("Mismatched parenthesis: no matching opening parenthesis")
 			}
+		case parser.VariableDeclaration:
+			// TODO Make this one better with pointers
+
+			exprSlice, isSlice := v.Expression.([]any)
+			if isSlice {
+				v.Expression = TransformToReversePolishNotation(exprSlice)
+			} else {
+				v.Expression = TransformToReversePolishNotation([]any{v.Expression})
+			}
+
+			outputQueue = append(outputQueue, v)
 		default:
 			panic("Unknown token encountered")
 		}

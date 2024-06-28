@@ -4,8 +4,16 @@ import (
 	"strconv"
 )
 
+type Expression interface {
+	getType() string
+}
+
 type Integer struct {
 	Value int
+}
+
+func (int Integer) getType() string {
+	return "int"
 }
 
 type Operator struct {
@@ -13,7 +21,12 @@ type Operator struct {
 }
 
 type Variable struct {
-	Name string
+	Name  string
+	Value Expression
+}
+
+func (variable Variable) getType() string {
+	return variable.Value.getType()
 }
 
 type Operation struct {

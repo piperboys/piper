@@ -38,6 +38,8 @@ func handleRepl() {
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("--- The Piper Language REPL ---\nType an expression and instantly see the result\nPress q to quit")
 
+	interpreterStruct := interpreter.NewInterpreter()
+
 	for {
 		fmt.Print(">")
 		input := scanner.Scan()
@@ -64,7 +66,7 @@ func handleRepl() {
 
 		// Evaluate
 		for _, v := range res.([]any) {
-			evalResult := interpreter.Evaluate(v.([]any))
+			evalResult := interpreterStruct.Evaluate(v.([]any))
 			fmt.Println(evalResult)
 		}
 
@@ -98,8 +100,10 @@ func handleFileRead() {
 
 	printDebug(res.([]any))
 
+	interpreterStruct := interpreter.NewInterpreter()
+
 	for _, v := range res.([]any) {
-		evalResult := interpreter.Evaluate(v.([]any))
+		evalResult := interpreterStruct.Evaluate(v.([]any))
 
 		fmt.Println(evalResult)
 	}

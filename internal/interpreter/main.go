@@ -1,8 +1,19 @@
 package interpreter
 
-import "github.com/aerochrome/piper/internal/parser"
+import (
+	"fmt"
+	"github.com/aerochrome/piper/internal/parser"
+)
 
-func Evaluate(input []any) any {
+type Interpreter struct {
+	variables map[string]*parser.Variable
+}
+
+func NewInterpreter() *Interpreter {
+	return &Interpreter{variables: make(map[string]*parser.Variable)}
+}
+
+func (interpreter *Interpreter) Evaluate(input []any) any {
 	var stack []any
 
 	for _, item := range input {
@@ -15,6 +26,34 @@ func Evaluate(input []any) any {
 			stack = stack[:len(stack)-2] // remove the last two
 
 			stack = append(stack, evaluateOperation(left, right, item))
+		case parser.VariableDeclaration:
+			_, exists := interpreter.variables[item.Variable.Name]
+
+			if exists {
+				panic(fmt.Sprintf("Variable '%s' cannot be redefined", item.Variable.Name))
+			}
+
+			exprSlice, ok := item.Expression.([]any)
+
+			var result any
+			if ok {
+				result = interpreter.Evaluate(exprSlice)
+			} else {
+				result = interpreter.Evaluate([]any{item.Expression})
+			}
+
+			interpreter.variables[item.Variable.Name] = &item.Variable
+			interpreter.variables[item.Variable.Name].Value = result.(parser.Expression)
+
+			stack = append(stack, result)
+		case parser.Variable:
+			variable, exists := interpreter.variables[item.Name]
+
+			if !exists {
+				panic(fmt.Sprintf("Variable '%s' is not defined", item.Name))
+			}
+
+			stack = append(stack, variable.Value)
 		default:
 			panic("Unknown token found")
 		}

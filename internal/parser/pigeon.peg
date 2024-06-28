@@ -9,7 +9,7 @@ Input <- input:(sf Expression sf (ln/EOF))* EOF{
     return extractExpression(input)
 }
 
-Expression <- exp:(Operation / Group / Constant)
+Expression <- exp:(Operation / Group / VariableDeclaration / Variable / Constant)
 
 Operation <- left:Expression sf operator:Operator sf right:Expression {
     return extractOperation(left, operator, right)
@@ -23,6 +23,15 @@ Group <- LeftParenthesis sf expression:Expression sf RightParenthesis {
     return extractGroup(expression)
 }
 
+VariableDeclaration <- variable:Variable sf '=' sf expr:Expression {
+    return extractVariableDeclaration(variable, expr)
+}
+
+Variable <- [a-zA-Z_][a-zA-Z0-9_]* {
+    return extractVariable(string(c.text))
+}
+
+Type <- "int"
 Constant <- Integer
 Integer <- integer:[0-9]+ {
     return extractInteger(integer)

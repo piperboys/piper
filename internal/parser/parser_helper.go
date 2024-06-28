@@ -12,6 +12,10 @@ type Operator struct {
 	Value string
 }
 
+type Variable struct {
+	Name string
+}
+
 type Operation struct {
 	left     any
 	operator Operator
@@ -24,6 +28,11 @@ type LeftParenthesis struct {
 
 type RightParenthesis struct {
 	Value string
+}
+
+type VariableDeclaration struct {
+	Variable   Variable
+	Expression any
 }
 
 func extractExpression(input any) (any, error) {
@@ -75,6 +84,10 @@ func extractInteger(integer any) (Integer, error) {
 	return Integer{Value: value}, nil
 }
 
+func extractVariable(variableName string) (Variable, error) {
+	return Variable{Name: variableName}, nil
+}
+
 func extractOperation(left any, operator any, right any) ([]any, error) {
 	var combined []any
 
@@ -112,4 +125,8 @@ func extractGroup(expression any) ([]any, error) {
 	combined = append(combined, RightParenthesis{Value: ")"})
 
 	return combined, nil
+}
+
+func extractVariableDeclaration(variable any, expression any) (VariableDeclaration, error) {
+	return VariableDeclaration{Variable: variable.(Variable), Expression: expression}, nil
 }

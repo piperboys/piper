@@ -15,6 +15,8 @@ func Evaluate(input []any) any {
 			stack = stack[:len(stack)-2] // remove the last two
 
 			stack = append(stack, evaluateOperation(left, right, item))
+		default:
+			panic("Unknown token found")
 		}
 	}
 

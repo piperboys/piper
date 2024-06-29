@@ -111,7 +111,7 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
+			leader:        true,
 			leftRecursive: true,
 		},
 		{
@@ -158,7 +158,7 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        true,
+			leader:        false,
 			leftRecursive: true,
 		},
 		{
@@ -446,6 +446,12 @@ var g = &grammar{
 						},
 						&litMatcher{
 							pos:        position{line: 38, col: 18, offset: 1003},
+							val:        "float",
+							ignoreCase: false,
+							want:       "\"float\"",
+						},
+						&litMatcher{
+							pos:        position{line: 38, col: 28, offset: 1013},
 							val:        "func",
 							ignoreCase: false,
 							want:       "\"func\"",
@@ -458,27 +464,36 @@ var g = &grammar{
 		},
 		{
 			name: "Constant",
-			pos:  position{line: 42, col: 1, offset: 1047},
-			expr: &ruleRefExpr{
-				pos:  position{line: 42, col: 13, offset: 1059},
-				name: "Integer",
+			pos:  position{line: 42, col: 1, offset: 1057},
+			expr: &choiceExpr{
+				pos: position{line: 42, col: 14, offset: 1070},
+				alternatives: []any{
+					&ruleRefExpr{
+						pos:  position{line: 42, col: 14, offset: 1070},
+						name: "Float64",
+					},
+					&ruleRefExpr{
+						pos:  position{line: 42, col: 24, offset: 1080},
+						name: "Integer",
+					},
+				},
 			},
 			leader:        false,
 			leftRecursive: false,
 		},
 		{
 			name: "Integer",
-			pos:  position{line: 43, col: 1, offset: 1067},
+			pos:  position{line: 43, col: 1, offset: 1089},
 			expr: &actionExpr{
-				pos: position{line: 43, col: 12, offset: 1078},
+				pos: position{line: 43, col: 12, offset: 1100},
 				run: (*parser).callonInteger1,
 				expr: &labeledExpr{
-					pos:   position{line: 43, col: 12, offset: 1078},
+					pos:   position{line: 43, col: 12, offset: 1100},
 					label: "integer",
 					expr: &oneOrMoreExpr{
-						pos: position{line: 43, col: 20, offset: 1086},
+						pos: position{line: 43, col: 20, offset: 1108},
 						expr: &charClassMatcher{
-							pos:        position{line: 43, col: 20, offset: 1086},
+							pos:        position{line: 43, col: 20, offset: 1108},
 							val:        "[0-9]",
 							ranges:     []rune{'0', '9'},
 							ignoreCase: false,
@@ -491,10 +506,51 @@ var g = &grammar{
 			leftRecursive: false,
 		},
 		{
+			name: "Float64",
+			pos:  position{line: 46, col: 1, offset: 1154},
+			expr: &actionExpr{
+				pos: position{line: 46, col: 12, offset: 1165},
+				run: (*parser).callonFloat641,
+				expr: &seqExpr{
+					pos: position{line: 46, col: 12, offset: 1165},
+					exprs: []any{
+						&oneOrMoreExpr{
+							pos: position{line: 46, col: 12, offset: 1165},
+							expr: &charClassMatcher{
+								pos:        position{line: 46, col: 12, offset: 1165},
+								val:        "[0-9]",
+								ranges:     []rune{'0', '9'},
+								ignoreCase: false,
+								inverted:   false,
+							},
+						},
+						&litMatcher{
+							pos:        position{line: 46, col: 18, offset: 1171},
+							val:        ".",
+							ignoreCase: false,
+							want:       "\".\"",
+						},
+						&oneOrMoreExpr{
+							pos: position{line: 46, col: 21, offset: 1174},
+							expr: &charClassMatcher{
+								pos:        position{line: 46, col: 21, offset: 1174},
+								val:        "[0-9]",
+								ranges:     []rune{'0', '9'},
+								ignoreCase: false,
+								inverted:   false,
+							},
+						},
+					},
+				},
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
 			name: "LeftParenthesis",
-			pos:  position{line: 46, col: 1, offset: 1132},
+			pos:  position{line: 49, col: 1, offset: 1227},
 			expr: &litMatcher{
-				pos:        position{line: 46, col: 20, offset: 1151},
+				pos:        position{line: 49, col: 20, offset: 1246},
 				val:        "(",
 				ignoreCase: false,
 				want:       "\"(\"",
@@ -504,9 +560,9 @@ var g = &grammar{
 		},
 		{
 			name: "RightParenthesis",
-			pos:  position{line: 47, col: 1, offset: 1155},
+			pos:  position{line: 50, col: 1, offset: 1250},
 			expr: &litMatcher{
-				pos:        position{line: 47, col: 21, offset: 1175},
+				pos:        position{line: 50, col: 21, offset: 1270},
 				val:        ")",
 				ignoreCase: false,
 				want:       "\")\"",
@@ -517,11 +573,11 @@ var g = &grammar{
 		{
 			name:        "sf",
 			displayName: "\"spacefiller\"",
-			pos:         position{line: 50, col: 1, offset: 1181},
+			pos:         position{line: 53, col: 1, offset: 1276},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 50, col: 21, offset: 1201},
+				pos: position{line: 53, col: 21, offset: 1296},
 				expr: &charClassMatcher{
-					pos:        position{line: 50, col: 21, offset: 1201},
+					pos:        position{line: 53, col: 21, offset: 1296},
 					val:        "[ \\t]",
 					chars:      []rune{' ', '\t'},
 					ignoreCase: false,
@@ -534,11 +590,11 @@ var g = &grammar{
 		{
 			name:        "ln",
 			displayName: "\"linebreak\"",
-			pos:         position{line: 51, col: 1, offset: 1208},
+			pos:         position{line: 54, col: 1, offset: 1303},
 			expr: &oneOrMoreExpr{
-				pos: position{line: 51, col: 19, offset: 1226},
+				pos: position{line: 54, col: 19, offset: 1321},
 				expr: &charClassMatcher{
-					pos:        position{line: 51, col: 19, offset: 1226},
+					pos:        position{line: 54, col: 19, offset: 1321},
 					val:        "[\\n\\r]",
 					chars:      []rune{'\n', '\r'},
 					ignoreCase: false,
@@ -550,11 +606,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 52, col: 1, offset: 1234},
+			pos:  position{line: 55, col: 1, offset: 1329},
 			expr: &notExpr{
-				pos: position{line: 52, col: 7, offset: 1240},
+				pos: position{line: 55, col: 7, offset: 1335},
 				expr: &anyMatcher{
-					line: 52, col: 8, offset: 1241,
+					line: 55, col: 8, offset: 1336,
 				},
 			},
 			leader:        false,
@@ -651,6 +707,16 @@ func (p *parser) callonInteger1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onInteger1(stack["integer"])
+}
+
+func (c *current) onFloat641() (any, error) {
+	return extractFloat64(string(c.text))
+}
+
+func (p *parser) callonFloat641() (any, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onFloat641()
 }
 
 var (

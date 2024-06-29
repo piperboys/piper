@@ -20,7 +20,7 @@ func (interpreter *Interpreter) Evaluate(input []any, additionalContext map[stri
 
 	for _, item := range input {
 		switch item := item.(type) {
-		case parser.Integer, parser.Function:
+		case parser.Integer, parser.Function, parser.Float64:
 			stack = append(stack, item)
 		case parser.Operator:
 			left := stack[len(stack)-2]
@@ -162,7 +162,7 @@ func evaluateArithmeticOperation(left any, right any, operator parser.Operator) 
 	case "*":
 		return parser.Integer{Value: leftInt.Value * rightInt.Value}
 	case "/":
-		return parser.Integer{Value: leftInt.Value / rightInt.Value}
+		return parser.Float64{Value: float64(leftInt.Value) / float64(rightInt.Value)}
 	default:
 		panic("Invalid arithmetic operator")
 	}

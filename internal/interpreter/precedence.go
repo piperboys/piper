@@ -40,7 +40,7 @@ func TransformToReversePolishNotation(result []any) []any {
 
 	for _, item := range result {
 		switch v := item.(type) {
-		case parser.Integer, parser.Variable:
+		case parser.Integer, parser.Variable, parser.Float64:
 			outputQueue = append(outputQueue, v)
 		case parser.Operator:
 			if len(operatorStack) > 0 {

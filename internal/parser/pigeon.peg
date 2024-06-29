@@ -35,13 +35,16 @@ Variable <- [a-zA-Z_][a-zA-Z0-9_]* {
     return extractVariable(string(c.text))
 }
 
-Type <- ("int" / "func") {
+Type <- ("int" / "float" / "func") {
     return string(c.text), nil
 }
 
-Constant <- Integer
+Constant <- (Float64 / Integer)
 Integer <- integer:[0-9]+ {
     return extractInteger(integer)
+}
+Float64 <- [0-9]+`.`[0-9]+ {
+    return extractFloat64(string(c.text))
 }
 LeftParenthesis <- `(`
 RightParenthesis <- `)`

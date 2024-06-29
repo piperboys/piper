@@ -67,7 +67,7 @@ func handleRepl() {
 		// Evaluate
 		for _, v := range res.([]any) {
 			evalResult := interpreterStruct.Evaluate(v.([]any), nil)
-			fmt.Println(evalResult)
+			fmt.Println(fmt.Sprintf("(%s) %v", evalResult.(parser.Expression).GetType(), evalResult))
 		}
 
 	}

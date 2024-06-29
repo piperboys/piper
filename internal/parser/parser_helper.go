@@ -16,6 +16,14 @@ func (int Integer) GetType() string {
 	return "int"
 }
 
+type Float64 struct {
+	Value float64
+}
+
+func (float Float64) GetType() string {
+	return "float"
+}
+
 type Operator struct {
 	Value string
 }
@@ -108,6 +116,16 @@ func extractInteger(integer any) (Integer, error) {
 	}
 
 	return Integer{Value: value}, nil
+}
+
+func extractFloat64(float any) (Float64, error) {
+	value, err := strconv.ParseFloat(float.(string), 64)
+
+	if err != nil {
+		panic("Invalid float parsed!")
+	}
+
+	return Float64{Value: value}, nil
 }
 
 func extractVariable(variableName string) (Variable, error) {

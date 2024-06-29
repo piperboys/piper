@@ -147,24 +147,77 @@ func (interpreter *Interpreter) callFunction(function parser.Function, argument 
 }
 
 func evaluateArithmeticOperation(left any, right any, operator parser.Operator) any {
-	leftInt, ok1 := left.(parser.Integer)
-	rightInt, ok2 := right.(parser.Integer)
+	// TODO refactor this monstrosity (works for my low 5am standards, but defo should be simplified somehow)
 
-	if !(ok1 && ok2) {
-		panic("Invalid arithmetic operation")
+	isFloatOperation := false
+	var leftValue any
+	var rightValue any
+
+	switch v := left.(type) {
+	case parser.Integer:
+		leftValue = v.Value
+	case parser.Float64:
+		isFloatOperation = true
+		leftValue = v.Value
 	}
+
+	switch v := right.(type) {
+	case parser.Integer:
+		if isFloatOperation {
+			rightValue = float64(v.Value)
+		} else {
+			rightValue = v.Value
+		}
+	case parser.Float64:
+		if !isFloatOperation {
+			isFloatOperation = true
+			leftValue = float64(leftValue.(int))
+		}
+		rightValue = v.Value
+	}
+
+	var resultValue any
 
 	switch operator.Value {
 	case "+":
-		return parser.Integer{Value: leftInt.Value + rightInt.Value}
+		switch v := leftValue.(type) {
+		case int:
+			resultValue = v + rightValue.(int)
+		case float64:
+			resultValue = v + rightValue.(float64)
+		}
 	case "-":
-		return parser.Integer{Value: leftInt.Value - rightInt.Value}
+		switch v := leftValue.(type) {
+		case int:
+			resultValue = v - rightValue.(int)
+		case float64:
+			resultValue = v - rightValue.(float64)
+		}
 	case "*":
-		return parser.Integer{Value: leftInt.Value * rightInt.Value}
+		switch v := leftValue.(type) {
+		case int:
+			resultValue = v * rightValue.(int)
+		case float64:
+			resultValue = v * rightValue.(float64)
+		}
 	case "/":
-		return parser.Float64{Value: float64(leftInt.Value) / float64(rightInt.Value)}
+		switch leftValue.(type) {
+		case int:
+			resultValue = float64(leftValue.(int)) / float64(rightValue.(int))
+		case float64:
+			resultValue = leftValue.(float64) / rightValue.(float64)
+		}
 	default:
 		panic("Invalid arithmetic operator")
+	}
+
+	switch v := resultValue.(type) {
+	case int:
+		return parser.Integer{Value: v}
+	case float64:
+		return parser.Float64{Value: v}
+	default:
+		panic("Congratz, you've found the impossible bug")
 	}
 }
 

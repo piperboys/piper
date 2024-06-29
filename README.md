@@ -14,10 +14,11 @@ A possible setup in your `.bashrc` or `.zshrc` can look like this
 
 ```bash
 # Go related
+export PATH=$PATH:/usr/local/go/bin
+
 export GOBIN=$(go env GOPATH)/bin
 export GOPATH=$(go env GOPATH)
 
-export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$GOPATH/bin
 ```
 

@@ -59,17 +59,11 @@ func handleRepl() {
 			break
 		}
 
-		// Transform
-		for idx, v := range res.([]any) {
-			res.([]any)[idx] = interpreter.TransformToReversePolishNotation(v.([]any))
-		}
+		resExpr := res.([]any)[0].([]any) // The REPL always just has one expression anyway, so no need to loop it
+		resExpr = interpreter.TransformToReversePolishNotation(resExpr)
 
-		// Evaluate
-		for _, v := range res.([]any) {
-			evalResult := interpreterStruct.Evaluate(v.([]any), nil)
-			fmt.Println(fmt.Sprintf("(%s) %v", evalResult.(parser.Expression).GetType(), evalResult))
-		}
-
+		evalResult := interpreterStruct.Evaluate(resExpr, nil)
+		fmt.Println(fmt.Sprintf("(%s) %v", evalResult.(parser.Expression).GetType(), evalResult))
 	}
 }
 

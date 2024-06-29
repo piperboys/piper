@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"reflect"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -52,6 +53,8 @@ func handleRepl() {
 			break
 		}
 
+		startTime := time.Now()
+
 		// Parse
 		res, err := parser.Parse("", scanner.Bytes())
 		if err != nil {
@@ -63,7 +66,10 @@ func handleRepl() {
 		resExpr = interpreter.TransformToReversePolishNotation(resExpr)
 
 		evalResult := interpreterStruct.Evaluate(resExpr, nil)
-		fmt.Println(fmt.Sprintf("(%s) %v", evalResult.(parser.Expression).GetType(), evalResult))
+
+		duration := time.Since(startTime)
+
+		fmt.Println(fmt.Sprintf("(%s)%v  -- took: %s", evalResult.(parser.Expression).GetType(), evalResult, duration))
 	}
 }
 

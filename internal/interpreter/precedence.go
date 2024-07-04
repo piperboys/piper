@@ -28,6 +28,12 @@ func TransformToReversePolishNotation(result []any) []any {
 				}
 
 				result[0] = v
+			case parser.Array:
+				for idx, expr := range v.Expressions {
+					v.Expressions[idx] = TransformToReversePolishNotation(expr)
+				}
+
+				result[0] = v
 			}
 		}
 
@@ -109,6 +115,11 @@ func TransformToReversePolishNotation(result []any) []any {
 				v.Expression = TransformToReversePolishNotation([]any{v.Expression})
 			}
 
+			outputQueue = append(outputQueue, v)
+		case parser.Array:
+			for idx, expr := range v.Expressions {
+				v.Expressions[idx] = TransformToReversePolishNotation(expr)
+			}
 			outputQueue = append(outputQueue, v)
 		default:
 			panic("Unknown token encountered")

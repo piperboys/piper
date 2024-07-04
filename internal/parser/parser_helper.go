@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"strconv"
 )
 
@@ -67,6 +68,14 @@ type Function struct {
 func (function Function) GetType() string {
 	// The function declaration in itself is of type func, only the call of the func has the ReturnType as Type
 	return "func"
+}
+
+type Array struct {
+	Expressions [][]any
+}
+
+func (array Array) GetType() string {
+	return "array"
 }
 
 func extractExpression(input any) (any, error) {
@@ -183,4 +192,43 @@ func extractFunction(argument any, argType any, returnType any, expr any) (Funct
 		Expression:        expr,
 		AdditionalContext: nil,
 	}, nil
+}
+
+func extractArraySingle(expression any) (Array, error) {
+	switch v := expression.(type) {
+	case Expression:
+		return Array{Expressions: [][]any{{v}}}, nil
+	case []any:
+		return Array{Expressions: [][]any{v}}, nil
+	}
+
+	return Array{}, errors.New("invalid expression")
+}
+
+func extractArray(expressions any) (Array, error) {
+	return Array{Expressions: expressions.([][]any)}, nil
+}
+
+func extractExpressionList(expression any, expressionList any) ([][]any, error) {
+	// TODO don't use append here (does dynamic alloc)
+
+	var results [][]any
+
+	switch v := expression.(type) {
+	case Expression:
+		results = append(results, []any{v})
+	case []any:
+		results = append(results, v)
+	}
+
+	switch v := expressionList.(type) {
+	case Expression:
+		results = append(results, []any{v})
+	case []any:
+		results = append(results, v)
+	case [][]any:
+		results = append(results, v...)
+	}
+
+	return results, nil
 }

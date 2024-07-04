@@ -64,6 +64,12 @@ func (interpreter *Interpreter) Evaluate(input []any, additionalContext map[stri
 				// TODO we might wanna push the variable on the stack instead of just the value?
 				stack = append(stack, variable.Value)
 			}
+		case parser.Array:
+			for idx, expr := range item.Expressions {
+				item.Expressions[idx] = []any{interpreter.Evaluate(expr, additionalContext)}
+			}
+
+			stack = append(stack, item)
 		default:
 			panic("Unknown token found")
 		}

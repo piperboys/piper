@@ -9,7 +9,10 @@ Input <- input:(sf Expression sf (ln/EOF))* EOF{
     return extractExpression(input)
 }
 
-Expression <- exp:(Operation / Group / VariableDeclaration / Function / Variable / Constant)
+Expression <- exp:(Operation / Group / Array / VariableDeclaration / Function / Variable / Constant)
+ExpressionList <- expr:Expression sf exprList:ExpressionList {
+    return extractExpressionList(expr, exprList)
+} / Expression
 
 Operation <- left:Expression sf operator:Operator sf right:Expression {
     return extractOperation(left, operator, right)
@@ -33,6 +36,12 @@ Function <- argument:Variable sf `:` sf argType:Type sf LeftParenthesis sf retur
 
 Variable <- [a-zA-Z_][a-zA-Z0-9_]* {
     return extractVariable(string(c.text))
+}
+
+Array <- '[' sf expr:Expression sf ']' {
+    return extractArraySingle(expr)
+} / '[' sf expr:ExpressionList sf ']' {
+    return extractArray(expr)
 }
 
 Type <- ("int" / "float" / "func") {

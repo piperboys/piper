@@ -96,8 +96,37 @@ func (interpreter *Interpreter) evaluateOperation(left any, right any, operator 
 		return evaluateArithmeticOperation(left, right, operator)
 	case "|":
 		return interpreter.evaluateFunctionCall(left, right, additionalContext)
+	case "|>":
+		return interpreter.evaluateLoop(left, right, additionalContext)
 	default:
 		panic(fmt.Sprintf("Unknown operator '%s'", operator.Value))
+	}
+}
+
+func (interpreter *Interpreter) evaluateLoop(left any, right any, additionalContext map[string]*parser.Variable) any {
+	leftExpr, isArray := left.(parser.Array)
+
+	if !isArray {
+		panic(fmt.Sprintf("Left expression not an array, got '%T' instead", left))
+	}
+
+	switch v := right.(type) {
+	case parser.Function:
+		resultArr := parser.Array{Expressions: make([][]any, len(leftExpr.Expressions))}
+
+		for idx, item := range leftExpr.Expressions {
+			resultArr.Expressions[idx] = []any{interpreter.callFunction(v, item[0].(parser.Expression), additionalContext)}
+
+			if resultArr.ElementType == "" {
+				resultArr.ElementType = resultArr.Expressions[idx][0].(parser.Expression).GetType()
+			}
+
+			// TODO we don't need to check here for different element types, because it comes from the same func with the same return type
+		}
+
+		return resultArr
+	default:
+		panic(fmt.Sprintf("Expression '%v' of type '%T' is not a function", v, v))
 	}
 }
 

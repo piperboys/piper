@@ -247,15 +247,15 @@ var g = &grammar{
 							},
 							&litMatcher{
 								pos:        position{line: 21, col: 47, offset: 540},
-								val:        "|",
-								ignoreCase: false,
-								want:       "\"|\"",
-							},
-							&litMatcher{
-								pos:        position{line: 21, col: 53, offset: 546},
 								val:        "|>",
 								ignoreCase: false,
 								want:       "\"|>\"",
+							},
+							&litMatcher{
+								pos:        position{line: 21, col: 54, offset: 547},
+								val:        "|",
+								ignoreCase: false,
+								want:       "\"|\"",
 							},
 						},
 					},

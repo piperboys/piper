@@ -18,7 +18,7 @@ Operation <- left:Expression sf operator:Operator sf right:Expression {
     return extractOperation(left, operator, right)
 }
 
-Operator <- operator:(`+` / `-` / `/` / `*` / `|` / `|>`) {
+Operator <- operator:(`+` / `-` / `/` / `*` / "|>" / `|`) {
     return extractOperator(operator)
 }
 

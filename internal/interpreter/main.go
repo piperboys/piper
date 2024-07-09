@@ -67,6 +67,14 @@ func (interpreter *Interpreter) Evaluate(input []any, additionalContext map[stri
 		case parser.Array:
 			for idx, expr := range item.Expressions {
 				item.Expressions[idx] = []any{interpreter.Evaluate(expr, additionalContext)}
+
+				if item.ElementType == "" {
+					item.ElementType = item.Expressions[idx][0].(parser.Expression).GetType()
+				} else {
+					if item.Expressions[idx][0].(parser.Expression).GetType() != item.ElementType {
+						panic("Array expressions must have the same type")
+					}
+				}
 			}
 
 			stack = append(stack, item)

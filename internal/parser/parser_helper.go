@@ -72,10 +72,11 @@ func (function Function) GetType() string {
 
 type Array struct {
 	Expressions [][]any
+	ElementType string
 }
 
 func (array Array) GetType() string {
-	return "array"
+	return "[" + array.ElementType + "]"
 }
 
 func extractExpression(input any) (any, error) {
@@ -206,7 +207,8 @@ func extractArraySingle(expression any) (Array, error) {
 }
 
 func extractArray(expressions any) (Array, error) {
-	return Array{Expressions: expressions.([][]any)}, nil
+	// ElementType is evaluated during runtime
+	return Array{Expressions: expressions.([][]any), ElementType: ""}, nil
 }
 
 func extractExpressionList(expression any, expressionList any) ([][]any, error) {

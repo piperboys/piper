@@ -44,7 +44,7 @@ Array <- '[' sf expr:Expression sf ']' {
     return extractArray(expr)
 }
 
-Type <- ("int" / "float" / "func") {
+Type <- ("int" / "float" / "func" / `[` Type `]`) {
     return string(c.text), nil
 }
 

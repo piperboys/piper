@@ -35,7 +35,7 @@ go install github.com/mna/pigeon@latest
 For running the interpreter, you can use the following commands (in the root folder of the project)
 
 ```bash
-# Regenerate the parser from the pigeon.peg file
+# Regenerate the parser from the pigeon.peg file (only necessary if you've changed the .peg file)
 pigeon -support-left-recursion -o internal/parser/parser.go internal/parser/pigeon.peg
 
 # Run the interpreter

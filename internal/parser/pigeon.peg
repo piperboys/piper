@@ -5,7 +5,7 @@ import "reflect"
 import "fmt"
 }
 
-Input <- input:(sf Expression sf (ln/EOF/Comment))* EOF{
+Input <- input:(sf Expression sf (ln/EOF))* EOF{
     return extractExpression(input)
 }
 
@@ -18,11 +18,9 @@ Operation <- left:Expression sf operator:Operator sf right:Expression {
     return extractOperation(left, operator, right)
 }
 
-Operator <- operator:(`+` / `-` / `/` / `*` / `|` / `|>`) {
+Operator <- operator:(`+` / `-` / `/` / `*` / "|>" / `|`) {
     return extractOperator(operator)
 }
-
-Comment <- "--" (![\r\n] .)* [\r\n]?
 
 Group <- LeftParenthesis sf expression:Expression sf RightParenthesis {
     return extractGroup(expression)
@@ -61,6 +59,6 @@ LeftParenthesis <- `(`
 RightParenthesis <- `)`
 
 
-sf "spacefiller" <- (Comment/[ \t])*
-ln "linebreak" <- (Comment/[\n\r])+
+sf "spacefiller" <- [ \t]*
+ln "linebreak" <- [\n\r]+
 EOF<- !.

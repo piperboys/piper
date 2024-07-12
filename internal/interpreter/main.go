@@ -112,19 +112,19 @@ func (interpreter *Interpreter) evaluateLoop(left any, right any, additionalCont
 
 	switch v := right.(type) {
 	case parser.Function:
-		resultArr := parser.Array{Expressions: make([][]any, len(leftExpr.Expressions))}
+		leftExpr.ElementType = ""
 
 		for idx, item := range leftExpr.Expressions {
-			resultArr.Expressions[idx] = []any{interpreter.callFunction(v, item[0].(parser.Expression), additionalContext)}
+			leftExpr.Expressions[idx] = []any{interpreter.callFunction(v, item[0].(parser.Expression), additionalContext)}
 
-			if resultArr.ElementType == "" {
-				resultArr.ElementType = resultArr.Expressions[idx][0].(parser.Expression).GetType()
+			if leftExpr.ElementType == "" {
+				leftExpr.ElementType = leftExpr.Expressions[idx][0].(parser.Expression).GetType()
 			}
 
 			// TODO we don't need to check here for different element types, because it comes from the same func with the same return type
 		}
 
-		return resultArr
+		return leftExpr
 	default:
 		panic(fmt.Sprintf("Expression '%v' of type '%T' is not a function", v, v))
 	}

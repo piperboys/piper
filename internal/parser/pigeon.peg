@@ -9,7 +9,7 @@ Input <- input:(sf Expression sf (ln/EOF))* EOF{
     return extractExpression(input)
 }
 
-Expression <- exp:(Operation / Group / Array / VariableDeclaration / Function / Variable / Constant)
+Expression <- exp:(Operation / Group / Array / VariableDeclaration / Function / Ternary / Constant / Variable)
 ExpressionList <- expr:Expression sf exprList:ExpressionList {
     return extractExpressionList(expr, exprList)
 } / Expression
@@ -34,6 +34,10 @@ Function <- argument:Variable sf `:` sf argType:Type sf LeftParenthesis sf retur
     return extractFunction(argument, argType, returnType, expr)
 }
 
+Ternary <- condition:Expression sf `?` sf truePath:Expression sf `:` sf falsePath:Expression {
+    return extractTernary(condition, truePath, falsePath)
+}
+
 Variable <- [a-zA-Z_][a-zA-Z0-9_]* {
     return extractVariable(string(c.text))
 }
@@ -44,16 +48,19 @@ Array <- '[' sf expr:Expression sf ']' {
     return extractArray(expr)
 }
 
-Type <- ("int" / "float" / "func" / `[` Type `]`) {
+Type <- ("int" / "float" / "bool" / "func" / `[` Type `]`) {
     return string(c.text), nil
 }
 
-Constant <- (Float64 / Integer)
+Constant <- (Float64 / Integer / Boolean)
 Integer <- integer:[0-9]+ {
     return extractInteger(integer)
 }
 Float64 <- [0-9]+`.`[0-9]+ {
     return extractFloat64(string(c.text))
+}
+Boolean <- ("true" / "false") {
+    return extractBoolean(string(c.text))
 }
 LeftParenthesis <- `(`
 RightParenthesis <- `)`

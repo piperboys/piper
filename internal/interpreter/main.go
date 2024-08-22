@@ -20,7 +20,7 @@ func (interpreter *Interpreter) Evaluate(input []any, additionalContext map[stri
 
 	for _, item := range input {
 		switch item := item.(type) {
-		case parser.Integer, parser.Function, parser.Float64:
+		case parser.Integer, parser.Function, parser.Float64, parser.Boolean:
 			stack = append(stack, item)
 		case parser.Operator:
 			left := stack[len(stack)-2]
@@ -28,6 +28,44 @@ func (interpreter *Interpreter) Evaluate(input []any, additionalContext map[stri
 			stack = stack[:len(stack)-2] // remove the last two
 
 			stack = append(stack, interpreter.evaluateOperation(left, right, item, additionalContext))
+		case parser.Ternary:
+			condSlice, ok := item.Condition.([]any)
+
+			var condResult any
+			if ok {
+				condResult = interpreter.Evaluate(condSlice, additionalContext)
+			} else {
+				condResult = interpreter.Evaluate([]any{item.Condition}, additionalContext)
+			}
+
+			condResultBool, isBoolean := condResult.(parser.Boolean)
+			if !isBoolean {
+				panic("condition in ternary is not a boolean!")
+			}
+
+			if condResultBool.Value {
+				var truePathResult any
+
+				truePathSlice, ok := item.TruePath.([]any)
+				if ok {
+					truePathResult = interpreter.Evaluate(truePathSlice, additionalContext)
+				} else {
+					truePathResult = interpreter.Evaluate([]any{item.TruePath}, additionalContext)
+				}
+
+				stack = append(stack, truePathResult)
+			} else {
+				var falsePathResult any
+
+				falsePathSlice, ok := item.FalsePath.([]any)
+				if ok {
+					falsePathResult = interpreter.Evaluate(falsePathSlice, additionalContext)
+				} else {
+					falsePathResult = interpreter.Evaluate([]any{item.FalsePath}, additionalContext)
+				}
+
+				stack = append(stack, falsePathResult)
+			}
 		case parser.VariableDeclaration:
 			_, existsInContext := additionalContext[item.Variable.Name]
 			_, existsInGlobal := interpreter.variables[item.Variable.Name]

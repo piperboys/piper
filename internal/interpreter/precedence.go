@@ -28,6 +28,29 @@ func TransformToReversePolishNotation(result []any) []any {
 				}
 
 				result[0] = v
+			case parser.Ternary:
+				condSlice, isSlice := v.Condition.([]any)
+				if isSlice {
+					v.Condition = TransformToReversePolishNotation(condSlice)
+				} else {
+					v.Condition = TransformToReversePolishNotation([]any{v.Condition})
+				}
+
+				truePathSlice, isSlice := v.TruePath.([]any)
+				if isSlice {
+					v.TruePath = TransformToReversePolishNotation(truePathSlice)
+				} else {
+					v.TruePath = TransformToReversePolishNotation([]any{v.TruePath})
+				}
+
+				falsePathSlice, isSlice := v.FalsePath.([]any)
+				if isSlice {
+					v.FalsePath = TransformToReversePolishNotation(falsePathSlice)
+				} else {
+					v.FalsePath = TransformToReversePolishNotation([]any{v.FalsePath})
+				}
+
+				result[0] = v
 			case parser.Array:
 				for idx, expr := range v.Expressions {
 					v.Expressions[idx] = TransformToReversePolishNotation(expr)

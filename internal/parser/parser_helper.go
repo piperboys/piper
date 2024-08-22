@@ -25,6 +25,14 @@ func (float Float64) GetType() string {
 	return "float"
 }
 
+type Boolean struct {
+	Value bool
+}
+
+func (bool Boolean) GetType() string {
+	return "boolean"
+}
+
 type Operator struct {
 	Value string
 }
@@ -68,6 +76,12 @@ type Function struct {
 func (function Function) GetType() string {
 	// The function declaration in itself is of type func, only the call of the func has the ReturnType as Type
 	return "func"
+}
+
+type Ternary struct {
+	Condition any
+	TruePath  any
+	FalsePath any
 }
 
 type Array struct {
@@ -138,6 +152,15 @@ func extractFloat64(float any) (Float64, error) {
 	return Float64{Value: value}, nil
 }
 
+func extractBoolean(boolean any) (Boolean, error) {
+	value, err := strconv.ParseBool(boolean.(string)) // TODO own detection, good enough for me right now
+	if err != nil {
+		panic("Invalid boolean parsed!")
+	}
+
+	return Boolean{Value: value}, nil
+}
+
 func extractVariable(variableName string) (Variable, error) {
 	return Variable{Name: variableName}, nil
 }
@@ -192,6 +215,14 @@ func extractFunction(argument any, argType any, returnType any, expr any) (Funct
 		ReturnType:        returnType.(string),
 		Expression:        expr,
 		AdditionalContext: nil,
+	}, nil
+}
+
+func extractTernary(condition any, truePath any, falsePath any) (any, error) {
+	return Ternary{
+		Condition: condition,
+		TruePath:  truePath,
+		FalsePath: falsePath,
 	}, nil
 }
 
